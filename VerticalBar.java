@@ -1,3 +1,5 @@
+ 
+
 public class VerticalBar extends ProgressBar
 {
    public VerticalBar(DoubleLinkedList w)

@@ -1,13 +1,10 @@
+ 
+
 import mayflower.*;
-public class MovableAnimatedActor extends AnimatedActor
+public class MayMovableAnimatedActor extends MayAnimatedActor
 {
    
-     private Animation walkRight;
-     private Animation idle;
-     private Animation idleLeft;
-     private Animation leftFalling;
-     private Animation rightFalling;
-     private Animation walkLeft;
+     private MayAnimation walkRight, idle, idleLeft, leftFalling, rightFalling, walkLeft;
      private String currentAction;
      private String direction;
      
@@ -17,7 +14,7 @@ public class MovableAnimatedActor extends AnimatedActor
      
      public int[] location;
      
-     public MovableAnimatedActor()
+     public MayMovableAnimatedActor()
      {
          direction = "right";
          jumping = false;
@@ -59,25 +56,35 @@ public class MovableAnimatedActor extends AnimatedActor
              if(getY()>oldY-20 && !isBlocked())
              {
                  setLocation(x, y-13);
+                 SpaceCatRunner.setCosmoCurrX(x);
+                 SpaceCatRunner.setCosmoCurrY(y-13);
              }
              else
              {
                  jumping = false;
                  setLocation(x, y+12);
+                 SpaceCatRunner.setCosmoCurrX(x);
+                 SpaceCatRunner.setCosmoCurrY(y+12);
              }
          }
          if(jumping && passLimit)
         {
              oldY = getY();
              setLocation(x, oldY+610);
+             SpaceCatRunner.setCosmoCurrX(x);
+             SpaceCatRunner.setCosmoCurrY(oldY+610);
              if(getY()>oldY-20 && !isBlocked())
              {
                  setLocation(x, getY()-13);
+                 SpaceCatRunner.setCosmoCurrX(x);
+                 SpaceCatRunner.setCosmoCurrY(getY()-13);
              }
              else
              {
                  jumping = false;
                  setLocation(x, y+12);
+                 SpaceCatRunner.setCosmoCurrX(x);
+                 SpaceCatRunner.setCosmoCurrY(y+12);
              }
          }
          
@@ -89,6 +96,8 @@ public class MovableAnimatedActor extends AnimatedActor
             if(isBlocked())
             {
                 setLocation(x, y+1);
+                SpaceCatRunner.setCosmoCurrX(x);
+                SpaceCatRunner.setCosmoCurrY(y+1);
             }
         }
         if(Mayflower.isKeyDown(Keyboard.KEY_RIGHT) )//x+5+w<800
@@ -98,6 +107,8 @@ public class MovableAnimatedActor extends AnimatedActor
                 jumping = false;
             }
             setLocation(x+10, y);
+            SpaceCatRunner.setCosmoCurrX(x+10);
+            SpaceCatRunner.setCosmoCurrY(y);
             if(!isFalling())
             {
                 newAction = "walkRight";
@@ -106,6 +117,8 @@ public class MovableAnimatedActor extends AnimatedActor
             if(isBlocked())
             {
                 setLocation(x-1, y);
+                SpaceCatRunner.setCosmoCurrX(x-1);
+                SpaceCatRunner.setCosmoCurrY(y);
             }
         }
          else if(Mayflower.isKeyDown(Keyboard.KEY_LEFT))// && x-5>0
@@ -115,6 +128,8 @@ public class MovableAnimatedActor extends AnimatedActor
                 jumping = false;
             }
             setLocation(x-10, y);
+            SpaceCatRunner.setCosmoCurrX(x-10);
+            SpaceCatRunner.setCosmoCurrY(y);
             ////
             if(!isFalling())
             {
@@ -124,6 +139,8 @@ public class MovableAnimatedActor extends AnimatedActor
             if(isBlocked())
             {
                 setLocation(x+1, y);
+                SpaceCatRunner.setCosmoCurrX(x+1);
+                SpaceCatRunner.setCosmoCurrY(y);
             }
         }
         else if(!isFalling())
@@ -179,37 +196,37 @@ public class MovableAnimatedActor extends AnimatedActor
        
             }
     //might need to remove that
-    public void setAnimation(Animation a)
+    public void setAnimation(MayAnimation a)
     {
         super.setAnimation(a);
     }
    
-    public void setWalkRightAnimation(Animation ani)
+    public void setWalkRightAnimation(MayAnimation ani)
     {
         walkRight = ani;
     }
    
-    public void setIdleAnimation(Animation ani)
+    public void setIdleAnimation(MayAnimation ani)
     {
         idle = ani;
     }
    
-    public void setWalkLeftAnimation(Animation ani)
+    public void setWalkLeftAnimation(MayAnimation ani)
     {
         walkLeft = ani;
     }
    
-    public void setIdleLeftAnimation(Animation ani)
+    public void setIdleLeftAnimation(MayAnimation ani)
     {
         idleLeft = ani;
     }
    
-    public void setLeftFallingAnimation(Animation ani)
+    public void setLeftFallingAnimation(MayAnimation ani)
     {
         leftFalling = ani;
     }
    
-    public void setRightFallingAnimation(Animation ani)
+    public void setRightFallingAnimation(MayAnimation ani)
     {
         rightFalling = ani;
     }

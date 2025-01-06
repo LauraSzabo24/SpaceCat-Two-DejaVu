@@ -1,5 +1,6 @@
+
 import java.util.*;
-public class DoubleLinkedList<E> implements GenericList<E>
+public class DoubleLinkedList<E> implements MayGenericList<E>
 {
     private Node<E> head;
     private int location;

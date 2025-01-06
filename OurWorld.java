@@ -1,13 +1,15 @@
+
 import mayflower.*;
 import java.util.*;
-
 public class OurWorld extends World {
-    private Cat cat;
+    private Cat cosmo;
     private String[][] tiles;
     public boolean generateLevel;
     private ArrayList<Actor> objects; 
-    public int catLastY;
-    public int catLastX;
+    public int cosmoLastY;
+    public int cosmoLastX;
+    public int cosmoCurrY;
+    public int cosmoCurrX;
     public Play play;
     private boolean started;
     
@@ -31,6 +33,8 @@ public class OurWorld extends World {
     //eras
     private DoubleLinkedList<Era> timeZones;
     private int currEra;
+    private int updateCycle;
+    private int lastUpdateCycle;
     
     //button press
     public boolean sPressed;
@@ -39,6 +43,8 @@ public class OurWorld extends World {
     public EndWorldButton endBut;//n
     private int counterFinal = 0;
     
+    //ghosts
+    private Ghost eraZero, eraOne, eraTwo, eraThree;    
     
     //dates
     private CatDate date;
@@ -46,6 +52,8 @@ public class OurWorld extends World {
     
     public OurWorld() 
     {
+        updateCycle = 0;
+        lastUpdateCycle = 0;
         started = false;
         shouldAct = true;
         exposition();
@@ -88,10 +96,12 @@ public class OurWorld extends World {
         tiles = new String[8][11];
         objects = new ArrayList<Actor>();
         
-        //cat
-        cat = new Cat();
-        catLastY = 0;
-        catLastX = 0;
+        //cosmo
+        cosmo = new Cat();
+        cosmoLastY = 0;
+        cosmoLastX = 0;
+        cosmoCurrY = 0;
+        cosmoCurrX = 0;
         
         //world generation and first date
         startWorld = new PlatformWorld(1, 1, 0, 0, 0, 0, "purple");
@@ -104,7 +114,8 @@ public class OurWorld extends World {
         universe.addToEnd(startWorld);
         createWorld(1,1, startWorld);
         text = "After exploring the galaxy, Space cat has decided to search for a partner...";
-        addMainCharacter(cat);
+        addMainCharacter(cosmo);
+        addGhosts();
         
         //progress bars
         horiB = new HorizontalBar(universe);
@@ -137,8 +148,21 @@ public class OurWorld extends World {
                 if(counterFinal==100)
                 {
                     destroyWorld();
-                    buildAlternateEnd();
                     endBut.setAction("PAUSE");
+                    buildDejaVuEnd();
+                }
+                else
+                {
+                    counterFinal++;
+                }
+            }
+            else if(isDualExistence())
+            {
+                if(counterFinal==100)
+                {
+                    destroyWorld();
+                    endBut.setAction("PAUSE");
+                    buildDualEnd();
                 }
                 else
                 {
@@ -159,6 +183,7 @@ public class OurWorld extends World {
                     expandWorld();
                     updateEra();
                     updateDate();
+                    updateGhosts();
                     text = date.getTrait();
                     showText(text, 20, 30, 530, Color.WHITE);
                 }
@@ -167,6 +192,82 @@ public class OurWorld extends World {
     }
     
     //UPDATES
+    public void updateGhosts()
+    {
+        updateCycle++;
+        Era currEraZone = timeZones.get(currEra);
+        currEraZone.updateHomeGhostMemory(cosmoCurrX, cosmoCurrY, "i");
+        double erax = 0;
+        double eray = 0;
+        if(updateCycle==100000)
+        {
+            updateCycle = 0;
+        }
+        if(lastUpdateCycle==100000)
+        {
+            lastUpdateCycle = 0;
+        }
+        switch(currEra){
+            case 0:
+                eraZero = currEraZone.getHomeGhost();
+            case 1:
+                if(updateCycle-lastUpdateCycle==7)
+                {
+                    eraOne = currEraZone.getHomeGhost();
+                    erax = eraZero.getCurrPos()[0];
+                    eray = eraZero.getCurrPos()[1];
+                    eraZero.setLocation(erax,eray);
+                    lastUpdateCycle = updateCycle;
+                }    
+            case 2:
+                if(updateCycle-lastUpdateCycle==20)
+                {
+                    eraTwo = currEraZone.getHomeGhost();
+                    erax = eraZero.getCurrPos()[0];
+                    eray = eraZero.getCurrPos()[1];
+                    eraZero.setLocation(erax,eray);
+                    
+                    erax = eraOne.getCurrPos()[0];
+                    eray = eraOne.getCurrPos()[1];
+                    eraOne.setLocation(erax,eray);
+                }
+            case 3:
+                if(updateCycle-lastUpdateCycle==20)
+                {
+                    eraThree = currEraZone.getHomeGhost();
+                    erax = eraZero.getCurrPos()[0];
+                    eray = eraZero.getCurrPos()[1];
+                    eraZero.setLocation(erax,eray);
+                    
+                    erax = eraOne.getCurrPos()[0];
+                    eray = eraOne.getCurrPos()[1];
+                    eraOne.setLocation(erax,eray);
+                    
+                    erax = eraTwo.getCurrPos()[0];
+                    eray = eraTwo.getCurrPos()[1];
+                    eraTwo.setLocation(erax,eray);
+                }
+            case 4:
+                if(updateCycle-lastUpdateCycle==20)
+                {
+                    erax = eraZero.getCurrPos()[0];
+                    eray = eraZero.getCurrPos()[1];
+                    eraZero.setLocation(erax,eray);
+                    
+                    erax = eraOne.getCurrPos()[0];
+                    eray = eraOne.getCurrPos()[1];
+                    eraOne.setLocation(erax,eray);
+                    
+                    erax = eraTwo.getCurrPos()[0];
+                    eray = eraTwo.getCurrPos()[1];
+                    eraTwo.setLocation(erax,eray);
+                    
+                    erax = eraThree.getCurrPos()[0];
+                    eray = eraThree.getCurrPos()[1];
+                    eraThree.setLocation(erax,eray);
+                }
+        }
+    }
     public void updateDate()
     {   
         if(currWrldMap instanceof PlatformWorld)
@@ -234,6 +335,7 @@ public class OurWorld extends World {
             updateProgressVeri();
             resetEra();
             universe = timeZones.get(currEra).getWorlds();
+            addGhosts();
         }
         else if(wPressed && !Mayflower.isKeyDown(Keyboard.KEY_W))
         {
@@ -243,6 +345,7 @@ public class OurWorld extends World {
             updateProgressVeri();
             resetEra();
             universe = timeZones.get(currEra).getWorlds();
+            removeGhosts();
         }
     }
     public void updateEra()
@@ -269,23 +372,67 @@ public class OurWorld extends World {
         timeZones.get(currEra).setStatus(false);
         timeZones.get(currEra).resetWorlds();
     }
+    public boolean isDualExistence()
+    {
+        for(int i=0; i< timeZones.size(); i++)
+        {
+            if(timeZones.get(i)!=null && timeZones.get(i).isDualExistence()==true)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     
-    //WORLD GENERATION "jelly"
+    //WORLD GENERATION
+    public void addGhosts()
+    {
+        switch(currEra){
+            case 0:
+                break;
+            case 1:
+                addObject(eraZero,1,1);
+            case 2:
+                addObject(eraOne,1,1);
+            case 3:
+                addObject(eraTwo,1,1);
+            case 4:
+                addObject(eraThree,1,1);
+        }
+    }
+    public void removeGhosts()
+    {
+        switch(currEra){
+            case 0:
+                System.out.println("removeeraZero" + eraZero);
+                removeObject(eraZero);
+            case 1:
+                removeObject(eraZero);
+            case 2:
+                removeObject(eraZero);
+            case 3:
+                removeObject(eraZero);
+            case 4:
+                break;
+        }
+    }
     public void expandWorld()
     {
-        if(cat.location[0]>=780)
+        if(cosmo.location[0]>=780)
         {
             removeObject(date);
             removeObject(currButton);
             destroyWorld();
-            cat.setLocation(1, (((int)catLastY/100))*100);
+            cosmoCurrX = 1;
+            cosmoCurrY = (((int)cosmoLastY/100))*100;
+            cosmo.setLocation(cosmoCurrX, cosmoCurrY);
             if(currLocation>=14)
             {
                 universe.setLoc(0);
                 currLocation = leftestLoc;
                 WorldMap nW = universe.getCurrent();
                 currWrldMap = nW;
-                createWorld(1,((int)catLastY/100)+1,nW);
+                createWorld(1,((int)cosmoLastY/100)+1,nW);
                 checkBlock("left");
                 horiB.updateColors();
                 ((HorizontalBar)horiB).updateDates();
@@ -302,10 +449,10 @@ public class OurWorld extends World {
             else{
                 if(universe.getNext()==null)
                 {
-                    WorldMap newWorld = new BlockWorld(1, ((int)catLastY/100)+1, 0, 0, 0,0, currWorld);
+                    WorldMap newWorld = new BlockWorld(1, ((int)cosmoLastY/100)+1, 0, 0, 0,0, currWorld);
                     if(currCount==1 && !currWorld.equals("purple"))
                     {
-                        newWorld = new PlatformWorld(1, ((int)catLastY/100)+1, 0, 0, 0,0, currWorld);
+                        newWorld = new PlatformWorld(1, ((int)cosmoLastY/100)+1, 0, 0, 0,0, currWorld);
                         ((PlatformWorld)newWorld).createDate();
                         date = ((PlatformWorld)newWorld).getCatDate();
                         addObject(date,100, 153);
@@ -315,14 +462,14 @@ public class OurWorld extends World {
                     }
                     universe.addToEnd(newWorld);
                     currWrldMap = newWorld;
-                    createWorld(1,((int)catLastY/100)+1, newWorld);
+                    createWorld(1,((int)cosmoLastY/100)+1, newWorld);
                     currCount++;
                     rightestLoc++;
                 }
                 else{
                     WorldMap nW = universe.getNext();
                     currWrldMap = nW;
-                    createWorld(1,((int)catLastY/100)+1,nW);
+                    createWorld(1,((int)cosmoLastY/100)+1,nW);
                     checkBlock("left");
                     System.out.println(nW.getHasCat());
                     if(nW.getHasCat())
@@ -343,20 +490,22 @@ public class OurWorld extends World {
             updateProgressHori();
             updateProgressVeri();
         }
-        else if(cat.location[0]<0)
+        else if(cosmo.location[0]<0)
         {
             removeObject(date);
             removeObject(currButton);
             text="";
             destroyWorld();
-            cat.setLocation(750, (((int)catLastY/100))*100);            
+            cosmoCurrX = 750;
+            cosmoCurrY = (((int)cosmoLastY/100))*100;
+            cosmo.setLocation(cosmoCurrX, cosmoCurrY);            
             if(currLocation<=0)
             {
                 universe.setLoc(rightestLoc);
                 currLocation = rightestLoc;
                 WorldMap nW = universe.getCurrent();
                 currWrldMap = nW;
-                createWorld(1,((int)catLastY/100)+1,nW);
+                createWorld(1,((int)cosmoLastY/100)+1,nW);
                 checkBlock("right");
                 horiB.updateColors();
                 ((HorizontalBar)horiB).updateDates();
@@ -374,10 +523,10 @@ public class OurWorld extends World {
             {
                 if(universe.getPrevious()==null)
                 {
-                    WorldMap newWorld = new BlockWorld(8, ((int)catLastY/100)+1, 0, 1,1, 0, currWorld);
+                    WorldMap newWorld = new BlockWorld(8, ((int)cosmoLastY/100)+1, 0, 1,1, 0, currWorld);
                     if(currCount==1 && !currWorld.equals("purple"))
                     {
-                        newWorld = new PlatformWorld(8, ((int)catLastY/100)+1, 0, 1,1, 0, currWorld);
+                        newWorld = new PlatformWorld(8, ((int)cosmoLastY/100)+1, 0, 1,1, 0, currWorld);
                         ((PlatformWorld)newWorld).createDate();
                         date = ((PlatformWorld)newWorld).getCatDate();
                         addObject(date,100, 153);
@@ -387,7 +536,7 @@ public class OurWorld extends World {
                     }
                     universe.addToStart(newWorld);
                     currWrldMap = newWorld;
-                    createWorld(8,((int)catLastY/100)+1, newWorld);
+                    createWorld(8,((int)cosmoLastY/100)+1, newWorld);
                     leftestLoc--;
                     currCount++;
                 }
@@ -395,7 +544,7 @@ public class OurWorld extends World {
                 {
                     WorldMap nW = universe.getPrevious();
                     currWrldMap = nW;
-                    createWorld(1,((int)catLastY/100)+1,nW);
+                    createWorld(1,((int)cosmoLastY/100)+1,nW);
                     universe.redLoc();
                     checkBlock("right");
                     
@@ -424,7 +573,7 @@ public class OurWorld extends World {
     }
     public void checkBlock(String dir)
     {
-        if(cat.isBlocked())
+        if(cosmo.isBlocked())
         {
             int yCor = 0;
             if(dir.equals("right"))
@@ -437,7 +586,9 @@ public class OurWorld extends World {
                     }
                     yCor+=93;
                 }
-                cat.setLocation(730, yCor-93);
+                cosmoCurrX = 730;
+                cosmoCurrY = yCor-93;
+                cosmo.setLocation(cosmoCurrX, cosmoCurrY);
             }
             else{
                 for(int i=0; i<tiles.length; i++)
@@ -448,7 +599,9 @@ public class OurWorld extends World {
                     }
                     yCor+=93;
                 }
-                cat.setLocation(1, yCor);
+                cosmoCurrX = 1;
+                cosmoCurrY = yCor;
+                cosmo.setLocation(cosmoCurrX, cosmoCurrY);
             }
         }
     }
@@ -470,8 +623,8 @@ public class OurWorld extends World {
     }
     public void destroyWorld()
     {
-        catLastY = cat.location[1];
-        catLastX = cat.location[0];
+        cosmoLastY = cosmo.location[1];
+        cosmoLastX = cosmo.location[0];
         for(Actor object: objects)
         {
             removeObject(object);
@@ -545,7 +698,7 @@ public class OurWorld extends World {
     }
     public void cleanupcrew()
     {
-        removeObject(cat);
+        removeObject(cosmo);
         removeObject(date);
         removeObject(currButton);
         removeObject(horiB);
@@ -569,11 +722,17 @@ public class OurWorld extends World {
         removeObject(veriB.getMainChar());
         removeObject(horiB.getMainChar());
     }
-    public void buildAlternateEnd()
+    public void buildDejaVuEnd()
     {
         shouldAct = false;
         cleanupcrew();
         setBackground("Ends/dejaVu.png");
+    }
+    public void buildDualEnd()
+    {
+        shouldAct = false;
+        cleanupcrew();
+        setBackground("Ends/dualexistence.png");
     }
     public void buildEndWorld(){
         shouldAct = false;
@@ -600,5 +759,13 @@ public class OurWorld extends World {
         addObject(catD, 510, 300);
         catD = new CatWorld("natural1");
         addObject(catD, 640, 300);
+    }
+    public void setCosmoCurrX(int x)
+    {
+        cosmoCurrX = x;
+    }
+    public void setCosmoCurrY(int y)
+    {
+        cosmoCurrY = y;
     }
 }       

@@ -4,32 +4,20 @@ import java.util.*;
 public class WorldMap extends World
 {
     public String[][] tiles;
-    private int age;
+    private int era;
     public boolean hasCat;
     public CatDate date;
     private String color;
     public String type;
-     private Select button;
-    public WorldMap(int catX, int catY, int xdir, int ydir, int dir, int era)
+    private Select button;
+    public WorldMap(int catX, int catY, int xdir, int ydir, int dir, int er)
     {
         tiles = new String[8][11];
-        age = era;
+        era = er;
         color = "purple";
         type = "PlatformWorld";
         button = new Select();
         hasCat = false;
-    }
-    public void act()
-    {
-        
-    }
-    public void experienceAge()
-    {
-        
-    }
-    public void buildWorld(int catX, int catY)
-    {
-        
     }
     public void printTiles()
     {
@@ -83,9 +71,9 @@ public class WorldMap extends World
     {
        return date;
     }
-    public int getAge()
+    public int getEra()
     {
-        return age;
+        return era;
     }
     public String getColor()
     {
@@ -107,8 +95,16 @@ public class WorldMap extends World
     {
         hasCat = c;
     }
-    public void setAge(int a)
+    public void setEra(int a)
     {
-        age = a;
+        era = a;
+    }
+    public void act()
+    {
+        
+    }
+    public void buildWorld(int catX, int catY)
+    {
+        
     }
 }

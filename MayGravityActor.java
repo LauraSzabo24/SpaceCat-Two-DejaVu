@@ -1,10 +1,9 @@
-  
+ 
 import mayflower.*;
-
-public class GravityActor extends Actor
+public class MayGravityActor extends Actor
 {
     private boolean passLowLimit;
-    public GravityActor()
+    public MayGravityActor()
     {
         passLowLimit = false;
     }
@@ -26,18 +25,21 @@ public class GravityActor extends Actor
     }
     public void act()
     {
-        setLocation(getX(), getY()+1);
-        if(getY()>600)
+        if(!(this instanceof Ghost))
         {
-            passLowLimit = true;
-            setLocation(getX(), 0);
-        }
-        else{
-            passLowLimit = false;
-        }
-        if(isBlocked())
-        {
-            setLocation(getX(), getY()-1);
-        }
+            setLocation(getX(), getY()+1);
+            if(getY()>600)
+            {
+                passLowLimit = true;
+                setLocation(getX(), 0);
+            }
+            else{
+                passLowLimit = false;
+            }
+            if(isBlocked())
+            {
+                setLocation(getX(), getY()-1);
+            } 
+        }    
     }
 }
